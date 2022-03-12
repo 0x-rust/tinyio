@@ -1,7 +1,7 @@
 pub mod poll {
+    use libc::poll;
     use std::net::TcpListener;
     use std::os::unix::io::{AsRawFd, RawFd};
-    use libc::poll;
 
     pub type EventFlags = libc::c_short;
     pub const READ: EventFlags = libc::POLLIN | libc::POLLPRI;
@@ -20,16 +20,14 @@ pub mod poll {
 
     pub struct IoEvent<K> {
         pub key: K,
-        events: EventFlags
+        events: EventFlags,
     }
 
     impl<K> IoEvent<K> {
         pub fn is_any(&self, flags: EventFlags) -> bool {
             flags & self.events != 0
         }
-    }
 
-    impl<K> IoEvent<K> {
         pub fn is_read(&self) -> bool {
             (self.events & READ) != 0
         }
@@ -39,20 +37,19 @@ pub mod poll {
         }
     }
 
-    impl<K: Eq + Clone>  IoEvent<K> {
-
-    }
-
     pub struct Registry<K> {
         key_index: Vec<K>,
-        poll_fds: Vec<PollFd>
+        poll_fds: Vec<PollFd>,
     }
-
 
     impl<K: Eq + Clone> Registry<K> {
         pub fn register(&mut self, key: K, f: &impl AsRawFd, event_type: EventFlags) {
             self.key_index.push(key);
-            let poll_fd = PollFd { fd: f.as_raw_fd(), events: event_type, revents: 0 };
+            let poll_fd = PollFd {
+                fd: f.as_raw_fd(),
+                events: event_type,
+                revents: 0,
+            };
             self.poll_fds.push(poll_fd)
         }
 
@@ -66,7 +63,7 @@ pub mod poll {
         pub fn new() -> Self {
             Self {
                 key_index: Vec::with_capacity(8),
-                poll_fds: Vec::with_capacity(8)
+                poll_fds: Vec::with_capacity(8),
             }
         }
 
@@ -78,8 +75,10 @@ pub mod poll {
             filled_events.clear();
             for (i, poll_fd) in self.poll_fds.iter().enumerate() {
                 if poll_fd.revents != 0 {
-                    filled_events.push(IoEvent{key: self.key_index[i].clone(),
-                                                    events: poll_fd.revents});
+                    filled_events.push(IoEvent {
+                        key: self.key_index[i].clone(),
+                        events: poll_fd.revents,
+                    });
                 }
             }
         }
