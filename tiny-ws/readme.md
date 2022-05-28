@@ -1,0 +1,1 @@
+## Bare bones implementation of Websocket client

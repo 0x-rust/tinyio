@@ -1,4 +1,4 @@
 [workspace]
-members = ["tinymux", "echo_bench"]
+members = ["tinymux", "echo_bench", "tiny-ws"]
 
 
